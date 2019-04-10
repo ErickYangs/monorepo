@@ -46,7 +46,7 @@ contract MixinAppRegistryCore is MAppRegistryCore {
   function getResolution(bytes32 identityHash)
     external
     view
-    returns (Transfer.Transaction memory)
+    returns (bytes memory)
   {
     return appResolutions[identityHash];
   }

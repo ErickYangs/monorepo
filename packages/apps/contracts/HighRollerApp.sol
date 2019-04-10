@@ -33,7 +33,6 @@ contract HighRollerApp is CounterfactualApp {
   }
 
   struct AppState {
-    address[2] playerAddrs;
     Stage stage;
     bytes32 salt;
     bytes32 commitHash;
@@ -116,59 +115,38 @@ contract HighRollerApp is CounterfactualApp {
     return abi.encode(nextState);
   }
 
-  function resolve(bytes memory encodedState, Transfer.Terms memory terms)
+  function resolve(bytes memory encodedState)
     public
     pure
-    returns (Transfer.Transaction memory)
+    returns (bytes memory)
   {
-    AppState memory state = abi.decode(encodedState, (AppState));
+    AppState memory appState = abi.decode(encodedState, (AppState));
 
-    uint256[] memory amounts = new uint256[](2);
-    address[] memory to = new address[](2);
-    to[0] = state.playerAddrs[0];
-    to[1] = state.playerAddrs[1];
     bytes32 expectedCommitHash = keccak256(
-      abi.encodePacked(state.salt, state.playerFirstNumber)
+      abi.encodePacked(appState.salt, appState.playerFirstNumber)
     );
-    if (expectedCommitHash == state.commitHash) {
-      amounts = getWinningAmounts(
-        state.playerFirstNumber, state.playerSecondNumber, terms.limit
+    if (expectedCommitHash == appState.commitHash) {
+      return getWinningAmounts(
+        appState.playerFirstNumber, appState.playerSecondNumber
       );
-    } else {
-      amounts[0] = 0;
-      amounts[1] = terms.limit;
     }
 
-    bytes[] memory data = new bytes[](2);
-
-    return Transfer.Transaction(
-      terms.assetType,
-      terms.token,
-      to,
-      amounts,
-      data
-    );
+    return abi.encodePacked(uint256(1));
   }
 
-  function getWinningAmounts(uint256 num1, uint256 num2, uint256 termsLimit)
+  function getWinningAmounts(uint256 num1, uint256 num2)
     public
     pure
-    returns (uint256[] memory)
+    returns (bytes memory)
   {
-    uint256[] memory amounts = new uint256[](2);
     bytes32 randomSalt = calculateRandomSalt(num1, num2);
     (uint8 playerFirstTotal, uint8 playerSecondTotal) = highRoller(randomSalt);
     if (playerFirstTotal > playerSecondTotal) {
-      amounts[0] = termsLimit;
-      amounts[1] = 0;
+    return abi.encodePacked(uint256(0));
     } else if (playerFirstTotal < playerSecondTotal) {
-      amounts[0] = 0;
-      amounts[1] = termsLimit;
-    } else {
-      amounts[0] = termsLimit / 2;
-      amounts[1] = termsLimit / 2;
+      return abi.encodePacked(uint256(1));
     }
-    return amounts;
+    return abi.encodePacked(uint256(2));
   }
 
   function highRoller(bytes32 randomness)

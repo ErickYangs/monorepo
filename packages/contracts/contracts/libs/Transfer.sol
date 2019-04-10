@@ -31,6 +31,12 @@ library Transfer {
     bytes[] data;
   }
 
+  struct Transaction2 {
+    address to;
+    uint256 value;
+    bytes data;
+  }
+
   /// @notice A delegate target for executing transfers of an arbitrary Transfer.Detail
   /// @param txn A `Transfer.Transaction` struct
   /// TODO: Add support for an OTHER Asset type and do a (to, value, data) CALL
@@ -49,25 +55,6 @@ library Transfer {
         );
       }
     }
-  }
-
-  /// @notice Verifies whether or not a `Transfer.Transaction` meets the terms set by a
-  /// `Transfer.Terms` object based on the limit information of how much can be transferred
-  /// @param txn A `Transfer.Transaction` struct
-  /// @return A boolean indicating if the terms are met
-  function meetsTerms(
-    Transfer.Transaction memory txn,
-    Transfer.Terms memory terms
-  )
-    public
-    pure
-    returns (bool)
-  {
-    uint256 sum = 0;
-    for (uint256 i = 0; i < txn.value.length; i++) {
-      sum += txn.value[i];
-    }
-    return sum <= terms.limit;
   }
 
 }

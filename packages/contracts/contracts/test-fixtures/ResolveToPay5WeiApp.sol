@@ -11,26 +11,12 @@ import "../CounterfactualApp.sol";
 /// `Transfer.Transaction` object when the channel is closed.
 contract ResolveToPay5WeiApp is CounterfactualApp {
 
-  function resolve(bytes memory encodedState, Transfer.Terms memory terms)
+  function resolve(bytes memory)
     public
     pure
-    returns (Transfer.Transaction memory)
+    returns (bytes memory)
   {
-    uint256[] memory amounts = new uint256[](1);
-    amounts[0] = 5 wei;
-
-    address[] memory to = new address[](1);
-    to[0] = address(0);
-
-    bytes[] memory data;
-
-    return Transfer.Transaction(
-      0,
-      address(0),
-      to,
-      amounts,
-      data
-    );
+    return abi.encode(500);
   }
 
   function isStateTerminal(bytes memory)
@@ -49,11 +35,11 @@ contract ResolveToPay5WeiApp is CounterfactualApp {
     revert("Not implemented");
   }
 
-  function applyAction(bytes memory encodedState, bytes memory)
+  function applyAction(bytes memory, bytes memory)
     public
     pure
     returns (bytes memory)
   {
-    return encodedState;
+    revert("Not implemented");
   }
 }

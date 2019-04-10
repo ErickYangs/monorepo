@@ -13,9 +13,8 @@ contract MAppRegistryCore {
   // the current on-chain status of some particular applications state.
   mapping (bytes32 => LibStateChannelApp.AppChallenge) public appChallenges;
 
-  // A mapping of appIdentityHash to Transaction structs which represents
-  // the *final* resolution of a particular application
-  mapping (bytes32 => Transfer.Transaction) public appResolutions;
+  // A mapping of appIdentityHash to resolutions
+  mapping (bytes32 => bytes) public appResolutions;
 
   /// @notice Compute a unique hash for a single instance of an App
   /// @param appIdentity An `AppIdentity` struct that encodes all unique info for an App

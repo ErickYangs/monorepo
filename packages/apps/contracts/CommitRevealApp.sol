@@ -23,7 +23,6 @@ contract CommitRevealApp is CounterfactualApp {
   }
 
   struct AppState {
-    address[2] playerAddrs;
     Stage stage;
     uint256 maximum;
     uint256 guessedNumber;
@@ -38,7 +37,7 @@ contract CommitRevealApp is CounterfactualApp {
   }
 
   function isStateTerminal(bytes memory encodedState)
-    public
+    external
     pure
     returns (bool)
   {
@@ -47,7 +46,7 @@ contract CommitRevealApp is CounterfactualApp {
   }
 
   function getTurnTaker(bytes memory encodedState, address[] memory signingKeys)
-    public
+    external
     pure
     returns (address)
   {
@@ -61,7 +60,7 @@ contract CommitRevealApp is CounterfactualApp {
   }
 
   function applyAction(bytes memory encodedState, bytes memory encodedAction)
-    public
+    external
     pure
     returns (bytes memory)
   {
@@ -102,36 +101,28 @@ contract CommitRevealApp is CounterfactualApp {
     return abi.encode(nextState);
   }
 
-  function resolve(bytes memory encodedState, Transfer.Terms memory terms)
-    public
+  function resolve(bytes memory encodedState)
+    external
     pure
-    returns (Transfer.Transaction memory)
+    returns (bytes memory)
   {
     AppState memory state = abi.decode(encodedState, (AppState));
 
-    uint256[] memory amounts = new uint256[](1);
-    amounts[0] = terms.limit;
-
-    address[] memory to = new address[](1);
-    uint256 player;
     if (state.stage == Stage.DONE) {
-      player = uint256(state.winner);
+      return abi.encode(state.winner);
+    } else if (state.stage == Stage.GUESSING) {
+      return abi.encode(Player.CHOOSING);
     } else {
-      // The player who is not the turn taker
-      player = 1 - uint256(
-        state.stage == Stage.GUESSING ? Player.GUESSING : Player.CHOOSING
-      );
+      return abi.encode(Player.GUESSING);
     }
-    to[0] = state.playerAddrs[player];
-
-    bytes[] memory data = new bytes[](2);
-
-    return Transfer.Transaction(
-      terms.assetType,
-      terms.token,
-      to,
-      amounts,
-      data
-    );
   }
+
+  function resolveSelector()
+    external
+    pure
+    returns (bytes4)
+  {
+    return this.resolve.selector
+  }
+
 }

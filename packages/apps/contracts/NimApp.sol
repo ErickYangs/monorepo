@@ -16,7 +16,6 @@ contract NimApp is CounterfactualApp {
   }
 
   struct AppState {
-    address[2] players;
     uint256 turnNum;
     uint256[3] pileHeights;
   }
@@ -60,33 +59,16 @@ contract NimApp is CounterfactualApp {
     return abi.encode(ret);
   }
 
-  function resolve(bytes memory encodedState, Transfer.Terms memory terms)
+  function resolve(bytes memory encodedState)
     public
     pure
-    returns (Transfer.Transaction memory)
+    returns (bytes memory)
   {
     AppState memory state = abi.decode(encodedState, (AppState));
 
     require(isWin(state), "Resolution state was not in a winning position");
-    address loser = state.players[state.turnNum % 2];
-    address winner = state.players[1 - (state.turnNum % 2)];
 
-    uint256[] memory amounts = new uint256[](2);
-    amounts[0] = terms.limit;
-    amounts[1] = 0;
-
-    address[] memory to = new address[](2);
-    to[0] = loser;
-    to[1] = winner;
-    bytes[] memory data = new bytes[](2);
-
-    return Transfer.Transaction(
-      terms.assetType,
-      terms.token,
-      to,
-      amounts,
-      data
-    );
+    return abi.encodePacked(state.turnNum % 2);
   }
 
   function isWin(AppState memory state)
